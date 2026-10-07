@@ -1,0 +1,42 @@
+{
+  "name": "pistachio-lemon spaghetti (practice)",
+  "messages": [
+    "Hi! I want to describe a pasta dish and I need you to keep track of it.",
+    "It's spaghetti, 200 g for two people, with a pistachio pesto.",
+    "The pesto is 60 g of shelled pistachios, the zest and juice of one lemon, and 3 tbsp of olive oil.",
+    "I'd add garlic too, one clove.",
+    "By the way, did you watch the match yesterday?",
+    "Actually no, scrap the garlic, I don't want any.",
+    "Then stir in 100 g of fresh ricotta and a handful of mint leaves at the end.",
+    "Finish with plenty of black pepper. Thanks!"
+  ],
+  "final_message": "/conclude",
+  "required_ingredients": {
+    "spaghetti": ["spaghetti"],
+    "pistachios": ["pistachio"],
+    "lemon": ["lemon"],
+    "olive oil": ["olive oil"],
+    "ricotta": ["ricotta"],
+    "mint": ["mint"],
+    "black pepper": ["pepper"]
+  },
+  "required_passages": {
+    "pistachio pesto combines pistachio, lemon and olive oil": [
+      ["pistachio", "lemon", "olive oil"]
+    ],
+    "ricotta and mint are stirred in at the end": [
+      ["ricotta", "mint", "end"],
+      ["ricotta", "mint", "finish"]
+    ],
+    "black pepper is used to finish or season the dish": [
+      ["finish", "pepper"],
+      ["season", "pepper"],
+      ["top", "pepper"]
+    ]
+  },
+  "forbidden": ["garlic", "parmesan", "butter", "cream", "egg", "onion", "tomato", "basil", "pine nut"],
+  "noise": ["match", "thanks", "hello", "\\bhi\\b"],
+  "note_count_range": [4, 20],
+  "bad_tools": ["get_current_time", "count_words", "summarize_text", "reverse_text",
+                "contains_keyword", "calculate", "suggest_ingredient", "lookup_classic_recipe"]
+}

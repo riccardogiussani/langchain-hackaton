@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Recipe note-taker</title>
+<style>
+  :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+  body { margin: 0; display: grid; grid-template-columns: 1fr 280px; height: 100vh; }
+  main, aside { display: flex; flex-direction: column; padding: 1rem; min-height: 0; }
+  aside { border-left: 1px solid #8884; }
+  #log { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: .5rem; }
+  .msg { padding: .5rem .75rem; border-radius: .6rem; max-width: 85%; white-space: pre-wrap; }
+  .user { align-self: flex-end; background: #2b6cb0; color: #fff; }
+  .bot { align-self: flex-start; background: #8883; }
+  form { display: flex; gap: .5rem; margin-top: .75rem; }
+  input { flex: 1; padding: .6rem; font: inherit; }
+  button { padding: .6rem 1rem; font: inherit; }
+  h2 { margin: 0 0 .5rem; font-size: 1rem; }
+  ul { padding-left: 1.1rem; margin: 0; overflow-y: auto; }
+  @media (max-width: 700px) { body { grid-template-columns: 1fr; } aside { display: none; } }
+</style>
+</head>
+<body>
+<main>
+  <div id="log"></div>
+  <form id="f"><input id="m" placeholder="Describe the dish... (type: final recipe)" autocomplete="off"><button>Send</button></form>
+</main>
+<aside><h2>Notes</h2><ul id="notes"></ul></aside>
+<script>
+const sid = crypto.randomUUID();
+const log = document.getElementById("log");
+const add = (t, c) => { const d = document.createElement("div"); d.className = "msg " + c; d.textContent = t; log.append(d); log.scrollTop = log.scrollHeight; };
+async function refreshNotes() {
+  const r = await fetch("/notes/" + sid); const j = await r.json();
+  const ul = document.getElementById("notes"); ul.replaceChildren();
+  j.notes.forEach(n => { const li = document.createElement("li"); li.textContent = n; ul.append(li); });
+}
+document.getElementById("f").addEventListener("submit", async e => {
+  e.preventDefault();
+  const input = document.getElementById("m"); const message = input.value.trim(); if (!message) return;
+  input.value = ""; add(message, "user");
+  try {
+    const r = await fetch("/chat", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ session_id: sid, message }) });
+    const j = await r.json(); add(r.ok ? j.reply : "Error: " + j.detail, "bot");
+  } catch (err) { add("Error: " + err, "bot"); }
+  refreshNotes();
+});
+</script>
+</body>
+</html>
