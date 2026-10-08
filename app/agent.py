@@ -12,26 +12,24 @@ import os
 
 from dotenv import load_dotenv
 from langchain.agents import create_agent
-from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langgraph.checkpoint.memory import InMemorySaver
 
 from app import helpers
 from scripts import extensions
 
 load_dotenv()
 
-model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4.1-mini"), temperature=0)
+model = ChatOpenAI(model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"), temperature=0)
 
 # --- Tools -------------------------------------------------------------------
 # The docstring is what the model reads to decide WHEN to call the tool.
-# `config` is injected by LangChain and is hidden from the model.
+# The output is what the model reads after running the function 
 
 @tool 
 def get_current_time() -> str:
-    """Returns the current time"""
-    return "Current time is: " + helpers.get_current_time()
+    """Returns the current time""" # This is what the agent knows about this function (in addition to the type of input to be given)(the model will generate the input automatically)
+    return "Current time is: " + helpers.get_current_time() # This is what the agents reads as an output (it is a text)(make it meaningful)
 
 # TODO 1: write the necessary tools using the helpers in app/notes.py
 #   - remove_note(keyword): needed when the user corrects themselves
@@ -47,16 +45,14 @@ SYSTEM_PROMPT = "You are a helpful cooking assistant."
 agent = create_agent(
     model=model,
     tools=[get_current_time],  # TODO: add your new tools
-    system_prompt=SYSTEM_PROMPT,
-    checkpointer=InMemorySaver(),
+    system_prompt=SYSTEM_PROMPT
 )
 
-def run_agent(session_id: str, message: str) -> str:
+def run_agent(message: str) -> str:
     if extensions._is_final_request(message):
         return extensions.conclude(helpers.get_notes(), helpers.get_ingredients())
     
     result = agent.invoke(
-        {"messages": [{"role": "user", "content": message}]},
-        config={"configurable": {"thread_id": session_id}},
+        {"messages": [{"role": "user", "content": message}]}
     )
     return result["messages"][-1].content

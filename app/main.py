@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from app import agent
+from app import solution
 from app import helpers
 
 app = FastAPI(title="Recipe note-taker")
@@ -24,7 +25,8 @@ class AgentOut(BaseModel):
 
 def _run(body: Query) -> str:
     try:
-        return agent.run_agent(body.session_id, body.message)
+        return agent.run_agent(body.message)
+        #return solution.run_agent(body.message)
     except Exception as e:
         raise HTTPException(status_code=502, detail=f"{type(e).__name__}: {e}")
 
@@ -43,6 +45,11 @@ def agent_query(body: Query):
     reply = _run(body)
     return AgentOut(reply=reply, notes=helpers.get_notes())
 
-@app.get("/notes/{session_id}")
+@app.get("/notes")
 def get_notes():
     return {"notes": helpers.get_notes()}
+
+@app.get("/agent/reset")
+def reset():
+    helpers._NOTES = []
+    helpers._INGREDIENTS = []

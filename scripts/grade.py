@@ -104,6 +104,7 @@ def main() -> None:
     sid = str(uuid.uuid4())
     responses: list[dict[str, Any]] = []
     with httpx.Client(base_url=args.url, timeout=120) as client:
+        response = client.get("/agent/reset")
         def send(msg: str) -> dict[str, Any]:
             response = client.post(
                 "/agent/query",
@@ -217,7 +218,7 @@ def main() -> None:
     for label, earned, possible in results:
         print(f"[{'OK' if earned == possible else '..'}] {earned:5.1f}/{possible:<3} {label}")
     if not critical_ok:
-        print("\nCRITICAL FAIL: the latest reply is incomplete or contains extra ingredients.")
+        print("\nWARNING: the latest reply is incomplete or contains extra ingredients.")
     print(f"\nSCORE: {total:.0f}/100")
     sys.exit(0 if total >= 80 and critical_ok else 1)
 
